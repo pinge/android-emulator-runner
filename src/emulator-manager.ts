@@ -182,16 +182,16 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
       attempts++;
     }
     attempts = 0
+    let broadcasts = '0';
+    await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
+      listeners: {
+        stdout: (data: Buffer) => {
+          broadcasts = data.toString();
+        },
+      },
+    });
     while (!localeChanged) {
       console.log(`attempts: ${attempts} | max: ${maxAttempts}`)
-      let broadcasts = '0';
-      await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
-        listeners: {
-          stdout: (data: Buffer) => {
-            broadcasts += data.toString();
-          },
-        },
-      });
       try {
         let result = '';
         await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
