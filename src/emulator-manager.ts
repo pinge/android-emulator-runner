@@ -77,7 +77,9 @@ export async function launchEmulator(
     });
 
     // wait for emulator to complete booting
-    await waitForDevice(port, emulatorBootTimeout);
+    const localeMatch = emulatorOptions.match(/ -change-locale ([a-z]{2}-[A-Z]{2})/)
+    const locale = localeMatch === null ? undefined : localeMatch[1]
+    await waitForDevice(port, emulatorBootTimeout, locale);
     await adb(port, `shell input keyevent 82`);
 
     if (disableAnimations) {
@@ -118,8 +120,9 @@ async function adb(port: number, command: string): Promise<number> {
 /**
  * Wait for emulator to boot.
  */
-async function waitForDevice(port: number, emulatorBootTimeout: number): Promise<void> {
+async function waitForDevice(port: number, emulatorBootTimeout: number, locale?: string): Promise<void> {
   let booted = false;
+  let localeChanged = locale === undefined;
   let attempts = 0;
   const retryInterval = 2; // retry every 2 seconds
   const maxAttempts = emulatorBootTimeout / 2;
@@ -146,6 +149,33 @@ async function waitForDevice(port: number, emulatorBootTimeout: number): Promise
       await delay(retryInterval * 1000);
     } else {
       throw new Error(`Timeout waiting for emulator to boot.`);
+    }
+    attempts++;
+  }
+  attempts = 0;
+  while (!localeChanged) {
+    try {
+      let result = '';
+      await exec.exec(`adb -s emulator-${port} shell getprop persist.sys.locale`, [], {
+        listeners: {
+          stdout: (data: Buffer) => {
+            result += data.toString();
+          },
+        },
+      });
+      if (result.trim() === locale) {
+        console.log('Emulator locale changed.');
+        localeChanged = true;
+        break;
+      }
+    } catch (error) {
+      console.warn(error instanceof Error ? error.message : error);
+    }
+
+    if (attempts < maxAttempts) {
+      await delay(retryInterval * 1000);
+    } else {
+      throw new Error(`Timeout waiting for emulator to change locale.`);
     }
     attempts++;
   }
