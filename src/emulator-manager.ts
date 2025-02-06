@@ -183,6 +183,15 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
     }
     attempts = 0
     while (!localeChanged) {
+      console.log(`attempts: ${attempts} | max: ${maxAttempts}`)
+      let broadcasts = '0';
+      await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
+        listeners: {
+          stdout: (data: Buffer) => {
+            broadcasts += data.toString();
+          },
+        },
+      });
       try {
         let result = '';
         await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
@@ -192,7 +201,7 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
             },
           },
         });
-        if (result.trim() === '2') {
+        if (parseInt(result.trim(), 10) > parseInt(broadcasts, 10)) {
           console.log('Emulator network ready.');
           localeChanged = true;
           await delay(retryInterval * 1000);
@@ -205,6 +214,7 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
       if (attempts < maxAttempts) {
         await delay(retryInterval * 1000);
       } else {
+        console.log('max attempts reached')
         throw new Error(`Timeout waiting for emulator to load locale.`);
       }
       attempts++;
