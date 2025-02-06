@@ -78,7 +78,7 @@ export async function launchEmulator(
 
     console.log('Getting locale..')
     // wait for emulator to complete booting
-    const localeMatch = emulatorOptions.match(/ -change-locale ([a-z]{2}-[A-Z]{2})/)
+    const localeMatch = emulatorOptions.match(/-change-locale ([a-z]{2}-[A-Z]{2})/)
     const locale = localeMatch === null ? undefined : localeMatch[1]
     console.log(`Locale: ${locale}`)
     await waitForDevice(port, emulatorBootTimeout, locale);
