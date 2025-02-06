@@ -185,7 +185,7 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
     while (!localeChanged) {
       try {
         let result = '';
-        await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Pair{${locale}' | wc -l | tr -d ' '"`, [], {
+        await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
           listeners: {
             stdout: (data: Buffer) => {
               result += data.toString();
@@ -193,7 +193,7 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
           },
         });
         if (result.trim() === '2') {
-          console.log('Emulator locale loaded.');
+          console.log('Emulator network ready.');
           localeChanged = true;
           await delay(retryInterval * 1000);
           break;
