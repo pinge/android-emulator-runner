@@ -155,32 +155,60 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
     attempts++;
   }
   attempts = 0;
-  while (!localeChanged) {
-    try {
-      let result = '';
-      await exec.exec(`adb -s emulator-${port} shell getprop persist.sys.locale`, [], {
-        listeners: {
-          stdout: (data: Buffer) => {
-            result += data.toString();
+  if (locale) {
+    while (!localeChanged) {
+      try {
+        let result = '';
+        await exec.exec(`adb -s emulator-${port} shell getprop persist.sys.locale`, [], {
+          listeners: {
+            stdout: (data: Buffer) => {
+              result += data.toString();
+            },
           },
-        },
-      });
-      if (result.trim() === locale) {
-        console.log('Emulator locale changed.');
-        localeChanged = true;
-        await delay(retryInterval * 1000);
-        break;
+        });
+        if (result.trim() === locale) {
+          console.log('Emulator locale changed.');
+          break;
+        }
+      } catch (error) {
+        console.warn(error instanceof Error ? error.message : error);
       }
-    } catch (error) {
-      console.warn(error instanceof Error ? error.message : error);
+  
+      if (attempts < maxAttempts) {
+        await delay(retryInterval * 1000);
+      } else {
+        throw new Error(`Timeout waiting for emulator to change locale.`);
+      }
+      attempts++;
     }
-
-    if (attempts < maxAttempts) {
-      await delay(retryInterval * 1000);
-    } else {
-      throw new Error(`Timeout waiting for emulator to change locale.`);
+    attempts = 0
+    while (!localeChanged) {
+      try {
+        let result = '';
+        await exec.exec(`adb -s emulator-${port} logcat -d | grep "Pair{${locale}" | wc -l | tr -d ' '`, [], {
+          listeners: {
+            stdout: (data: Buffer) => {
+              result += data.toString();
+            },
+          },
+        });
+        if (result.trim() === '2') {
+          console.log('Emulator locale loaded.');
+          localeChanged = true;
+          await delay(retryInterval * 1000);
+          break;
+        }
+      } catch (error) {
+        console.warn(error instanceof Error ? error.message : error);
+      }
+  
+      if (attempts < maxAttempts) {
+        await delay(retryInterval * 1000);
+      } else {
+        throw new Error(`Timeout waiting for emulator to load locale.`);
+      }
+      attempts++;
     }
-    attempts++;
   }
 }
 
