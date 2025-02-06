@@ -168,6 +168,7 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
       if (result.trim() === locale) {
         console.log('Emulator locale changed.');
         localeChanged = true;
+        await delay(retryInterval * 1000);
         break;
       }
     } catch (error) {
