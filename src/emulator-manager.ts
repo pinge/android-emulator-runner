@@ -185,7 +185,7 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
     while (!localeChanged) {
       try {
         let result = '';
-        await exec.exec(`adb -s emulator-${port} logcat -d | grep "Pair{${locale}" | wc -l | tr -d ' '`, [], {
+        await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Pair{${locale}' | wc -l | tr -d ' '"`, [], {
           listeners: {
             stdout: (data: Buffer) => {
               result += data.toString();
