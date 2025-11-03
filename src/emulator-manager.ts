@@ -121,7 +121,7 @@ async function adb(port: number, command: string): Promise<number> {
  * Wait for emulator to boot.
  */
 async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout: number, locale?: string): Promise<void> {
-
+  console.log(`waitForDevice() apiLevel: '${apiLevel}'`);
   let booted = false;
   let localeChanged = locale === undefined;
   let attempts = 0;
