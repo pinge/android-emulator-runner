@@ -79,7 +79,7 @@ export async function launchEmulator(
     // wait for emulator to complete booting
     const localeMatch = emulatorOptions.match(/-change-locale ([a-z]{2}-[A-Z]{2})/)
     const locale = localeMatch === null ? undefined : localeMatch[1]
-    await waitForDevice(port, emulatorBootTimeout, locale);
+    await waitForDevice(parseInt(apiLevel, 10), port, emulatorBootTimeout, locale);
     await adb(port, `shell input keyevent 82`);
 
     if (disableAnimations) {
@@ -120,7 +120,8 @@ async function adb(port: number, command: string): Promise<number> {
 /**
  * Wait for emulator to boot.
  */
-async function waitForDevice(port: number, emulatorBootTimeout: number, locale?: string): Promise<void> {
+async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout: number, locale?: string): Promise<void> {
+
   let booted = false;
   let localeChanged = locale === undefined;
   let attempts = 0;
@@ -192,7 +193,7 @@ async function waitForDevice(port: number, emulatorBootTimeout: number, locale?:
     while (!localeChanged) {
       try {
         let result = '';
-        await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
+        await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type ${apiLevel === 35 ? '' : '1'}' | wc -l | tr -d ' '"`, [], {
           listeners: {
             stdout: (data: Buffer) => {
               result += data.toString();
