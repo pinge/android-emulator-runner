@@ -111,7 +111,9 @@ export async function launchEmulator(
       await adb(port, `shell settings put global stylus_handwriting_enabled 0`);
     }
     if (apk.length > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       await adb(port, `install ${apk}`);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   } finally {
     console.log(`::endgroup::`);
