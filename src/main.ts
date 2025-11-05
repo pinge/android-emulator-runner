@@ -13,11 +13,12 @@ import {
   checkEnableHardwareKeyboard,
   checkDisableImmersiveModeConfirmation,
   checkDisableStylusHandwriting,
+  checkCleanupAvd,
   checkDiskSize,
   checkPort,
   MIN_PORT,
 } from './input-validator';
-import { launchEmulator, killEmulator } from './emulator-manager';
+import { launchEmulator, killEmulator, deleteAvd } from './emulator-manager';
 import * as exec from '@actions/exec';
 // import { parseScript } from './script-parser';
 import { getChannelId } from './channel-id-mapper';
@@ -25,6 +26,8 @@ import { accessSync, constants } from 'fs';
 
 async function run() {
   let port: number = MIN_PORT;
+  let avdName: string = '';
+  let cleanupAvd: boolean = false;
   try {
     console.log(`::group::Configure emulator`);
     let linuxSupportKVM = false;
@@ -85,7 +88,7 @@ async function run() {
     console.log(`Disk size: ${diskSize}`);
 
     // custom name used for creating the AVD
-    const avdName = core.getInput('avd-name');
+    avdName = core.getInput('avd-name');
     console.log(`AVD name: ${avdName}`);
 
     // force AVD creation
@@ -145,6 +148,11 @@ async function run() {
     checkDisableStylusHandwriting(disableStylusHandwritingInput);
     const disableStylusHandwriting = disableStylusHandwritingInput !== 'false';
     console.log(`disable stylus handwriting: ${disableStylusHandwriting}`);
+
+    const cleanupAvdInput = core.getInput('cleanup-avd');
+    checkCleanupAvd(cleanupAvdInput);
+    cleanupAvd = cleanupAvdInput === 'true';
+    console.log(`cleanup AVD: ${cleanupAvd}`);
 
     // emulator build
     const emulatorBuildInput = core.getInput('emulator-build');
@@ -261,9 +269,17 @@ async function run() {
 
     // finally kill the emulator
     await killEmulator(port);
+    // cleanup AVD if requested
+    if (cleanupAvd) {
+      await deleteAvd(avdName);
+    }
   } catch (error) {
     // kill the emulator so the action can exit
     await killEmulator(port);
+    // cleanup AVD if requested, even on error
+    if (cleanupAvd) {
+      await deleteAvd(avdName);
+    }
     core.setFailed(error instanceof Error ? error.message : (error as string));
   }
 }

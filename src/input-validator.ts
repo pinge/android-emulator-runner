@@ -85,6 +85,12 @@ export function checkDisableStylusHandwriting(disableStylusHandwriting: string):
   }
 }
 
+export function checkCleanupAvd(cleanupAvd: string): void {
+  if (!isValidBoolean(cleanupAvd)) {
+    throw new Error(`Input for input.cleanup-avd should be either 'true' or 'false'.`);
+  }
+}
+
 export function checkEmulatorBuild(emulatorBuild: string): void {
   if (isNaN(Number(emulatorBuild)) || !Number.isInteger(Number(emulatorBuild))) {
     throw new Error(`Unexpected emulator build: '${emulatorBuild}'.`);

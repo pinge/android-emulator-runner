@@ -53,6 +53,8 @@ inputs:
    type: boolean
   disable-stylus-handwriting:
    type: boolean
+  cleanup-avd:
+   type: boolean
   emulator-build:
    type: string
   working-directory:

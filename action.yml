@@ -60,6 +60,9 @@ inputs:
   disable-stylus-handwriting:
     description: 'whether to disable stylus handwriting'
     default: 'true'
+  cleanup-avd:
+    description: 'whether to delete the created AVD after execution - `true` or `false`'
+    default: 'false'
   emulator-build:
     description: 'build number of a specific version of the emulator binary to use - e.g. `6061023` for emulator v29.3.0.0'
   working-directory:
@@ -71,6 +74,9 @@ inputs:
   channel:
     description: 'Channel to download the SDK components from - `stable`, `beta`, `dev`, `canary`'
     default: 'stable'
+  run:
+    description: 'custom script to run - e.g. `./gradlew connectedCheck`'
+    required: true
   script:
     description: 'custom script to run - e.g. `./gradlew connectedCheck`'
     required: true
