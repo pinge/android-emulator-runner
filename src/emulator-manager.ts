@@ -239,7 +239,7 @@ async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout
       if (parseInt(result.trim(), 10) > parseInt(broadcasts, 10)) {
         console.log('Emulator network ready.');
         networkReady = true;
-        await delay(retryInterval * 1000);
+        // await delay(retryInterval * 1000);
         break;
       }
     } catch (error) {
