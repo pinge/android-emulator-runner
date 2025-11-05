@@ -149,10 +149,16 @@ async function run() {
     const disableStylusHandwriting = disableStylusHandwritingInput !== 'false';
     console.log(`disable stylus handwriting: ${disableStylusHandwriting}`);
 
+    // cleanup avd
     const cleanupAvdInput = core.getInput('cleanup-avd');
     checkCleanupAvd(cleanupAvdInput);
     cleanupAvd = cleanupAvdInput === 'true';
     console.log(`cleanup AVD: ${cleanupAvd}`);
+
+    // apk
+    const apk = core.getInput('apk');
+    checkDiskSize(apk);
+    console.log(`APK: ${apk}`);
 
     // emulator build
     const emulatorBuildInput = core.getInput('emulator-build');
@@ -247,7 +253,8 @@ async function run() {
       disableLinuxHardwareAcceleration,
       enableHardwareKeyboard,
       disableImmersiveModeConfirmation,
-      disableStylusHandwriting
+      disableStylusHandwriting,
+      apk
     );
 
     // execute the custom script

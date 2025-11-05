@@ -91,6 +91,13 @@ export function checkCleanupAvd(cleanupAvd: string): void {
   }
 }
 
+export function checkApk(apk: string): void {
+  // apk can be empty - the default value
+  if (typeof apk !== 'string') {
+    throw new Error(`Input for input.apk should be a string`);
+  }
+}
+
 export function checkEmulatorBuild(emulatorBuild: string): void {
   if (isNaN(Number(emulatorBuild)) || !Number.isInteger(Number(emulatorBuild))) {
     throw new Error(`Unexpected emulator build: '${emulatorBuild}'.`);

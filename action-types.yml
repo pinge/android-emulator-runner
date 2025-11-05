@@ -55,6 +55,8 @@ inputs:
    type: boolean
   cleanup-avd:
    type: boolean
+  apk:
+    type: string
   emulator-build:
    type: string
   working-directory:

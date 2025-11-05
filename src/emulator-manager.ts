@@ -24,7 +24,8 @@ export async function launchEmulator(
   disableLinuxHardwareAcceleration: boolean,
   enableHardwareKeyboard: boolean,
   disableImmersiveModeConfirmation: boolean,
-  disableStylusHandwriting: boolean
+  disableStylusHandwriting: boolean,
+  apk: string
 ): Promise<void> {
   try {
     console.log(`::group::Launch Emulator`);
@@ -101,6 +102,9 @@ export async function launchEmulator(
     }
     if (disableStylusHandwriting) {
       await adb(port, `shell settings put global stylus_handwriting_enabled 0`);
+    }
+    if (apk.length > 0) {
+      await adb(port, `install ${apk}`);
     }
   } finally {
     console.log(`::endgroup::`);

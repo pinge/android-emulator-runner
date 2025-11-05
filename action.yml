@@ -63,6 +63,8 @@ inputs:
   cleanup-avd:
     description: 'whether to delete the created AVD after execution - `true` or `false`'
     default: 'false'
+  apk:
+    description: 'the path for the apk to install when the emulator finishes booting'
   emulator-build:
     description: 'build number of a specific version of the emulator binary to use - e.g. `6061023` for emulator v29.3.0.0'
   working-directory:
