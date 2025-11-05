@@ -22,7 +22,9 @@ export async function launchEmulator(
   disableAnimations: boolean,
   disableSpellChecker: boolean,
   disableLinuxHardwareAcceleration: boolean,
-  enableHardwareKeyboard: boolean
+  enableHardwareKeyboard: boolean,
+  disableImmersiveModeConfirmation: boolean,
+  disableStylusHandwriting: boolean
 ): Promise<void> {
   try {
     console.log(`::group::Launch Emulator`);
@@ -93,6 +95,12 @@ export async function launchEmulator(
     }
     if (enableHardwareKeyboard) {
       await adb(port, `shell settings put secure show_ime_with_hard_keyboard 0`);
+    }
+    if (disableImmersiveModeConfirmation) {
+      await adb(port, `shell settings put secure immersive_mode_confirmations confirmed`);
+    }
+    if (disableStylusHandwriting) {
+      await adb(port, `shell settings put global stylus_handwriting_enabled 0`);
     }
   } finally {
     console.log(`::endgroup::`);

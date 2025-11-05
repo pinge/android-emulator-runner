@@ -54,6 +54,12 @@ inputs:
   enable-hw-keyboard:
     description: 'whether to enable hardware keyboard - `true` or `false`.'
     default: 'false'
+  disable-immersive-mode-confirmation:
+    description: 'whether to disable the immersive mode overlay confirmation on app launch (edge-to-edge)'
+    default: 'true'
+  disable-stylus-handwriting:
+    description: 'whether to disable stylus handwriting'
+    default: 'true'
   emulator-build:
     description: 'build number of a specific version of the emulator binary to use - e.g. `6061023` for emulator v29.3.0.0'
   working-directory:

@@ -73,6 +73,18 @@ export function checkEnableHardwareKeyboard(enableHardwareKeyboard: string): voi
   }
 }
 
+export function checkDisableImmersiveModeConfirmation(disableImmersiveModeConfirmation: string): void {
+  if (!isValidBoolean(disableImmersiveModeConfirmation)) {
+    throw new Error(`Input for input.disable-immersive-mode-confirmation should be either 'true' or 'false'.`);
+  }
+}
+
+export function checkDisableStylusHandwriting(disableStylusHandwriting: string): void {
+  if (!isValidBoolean(disableStylusHandwriting)) {
+    throw new Error(`Input for input.disable-stylus-handwriting should be either 'true' or 'false'.`);
+  }
+}
+
 export function checkEmulatorBuild(emulatorBuild: string): void {
   if (isNaN(Number(emulatorBuild)) || !Number.isInteger(Number(emulatorBuild))) {
     throw new Error(`Unexpected emulator build: '${emulatorBuild}'.`);

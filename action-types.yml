@@ -49,6 +49,10 @@ inputs:
    type: string
   enable-hw-keyboard:
    type: boolean
+  disable-immersive-mode-confirmation:
+   type: boolean
+  disable-stylus-handwriting:
+   type: boolean
   emulator-build:
    type: string
   working-directory:
