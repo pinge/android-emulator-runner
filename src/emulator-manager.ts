@@ -25,7 +25,8 @@ export async function launchEmulator(
   enableHardwareKeyboard: boolean,
   disableImmersiveModeConfirmation: boolean,
   disableStylusHandwriting: boolean,
-  apk: string
+  apk: string,
+  locale: string
 ): Promise<void> {
   try {
     console.log(`::group::Launch Emulator`);
@@ -66,6 +67,12 @@ export async function launchEmulator(
       emulatorOptions += ' -accel off';
     }
 
+    if (locale.length > 0) {
+      if (!emulatorOptions.match(/-change-locale ([a-z]{2}-[A-Z]{2})/)) {
+        emulatorOptions += ` -change-locale ${locale}`;
+      }
+    }
+
     // start emulator
     console.log('Starting emulator.');
 
@@ -80,8 +87,8 @@ export async function launchEmulator(
     });
 
     // wait for emulator to complete booting
-    const localeMatch = emulatorOptions.match(/-change-locale ([a-z]{2}-[A-Z]{2})/)
-    const locale = localeMatch === null ? undefined : localeMatch[1]
+    // const localeMatch = emulatorOptions.match(/-change-locale ([a-z]{2}-[A-Z]{2})/)
+    // const locale = localeMatch === null ? undefined : localeMatch[1]
     await waitForDevice(parseInt(apiLevel, 10), port, emulatorBootTimeout, locale);
     await adb(port, `shell input keyevent 82`);
 
@@ -148,10 +155,10 @@ export async function deleteAvd(avdName: string): Promise<void> {
 /**
  * Wait for emulator to boot.
  */
-async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout: number, locale?: string): Promise<void> {
+async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout: number, locale: string): Promise<void> {
   console.log(`waitForDevice() apiLevel: '${apiLevel}'`);
   let booted = false;
-  let localeChanged = locale === undefined;
+  let localeChanged = locale === '';
   let attempts = 0;
   const retryInterval = 2; // retry every 2 seconds
   let maxAttempts = emulatorBootTimeout / 2;
@@ -182,7 +189,7 @@ async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout
     attempts++;
   }
   attempts = 0;
-  if (locale) {
+  if (locale.length > 0) {
     while (!localeChanged) {
       try {
         let result = '';
@@ -200,7 +207,6 @@ async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout
       } catch (error) {
         console.warn(error instanceof Error ? error.message : error);
       }
-  
       if (attempts < maxAttempts) {
         await delay(retryInterval * 1000);
       } else {
@@ -208,43 +214,44 @@ async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout
       }
       attempts++;
     }
-    attempts = 0;
-    maxAttempts = 10;
-    let broadcasts = '0';
-    await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
-      listeners: {
-        stdout: (data: Buffer) => {
-          broadcasts = data.toString();
-        },
+  }
+  attempts = 0;
+  maxAttempts = 10;
+  let broadcasts = '0';
+  let networkReady = false;
+  await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
+    listeners: {
+      stdout: (data: Buffer) => {
+        broadcasts = data.toString();
       },
-    });
-    while (!localeChanged) {
-      try {
-        let result = '';
-        await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type ${apiLevel === 35 ? '' : '1'}' | wc -l | tr -d ' '"`, [], {
-          listeners: {
-            stdout: (data: Buffer) => {
-              result += data.toString();
-            },
+    },
+  });
+  while (!networkReady) {
+    try {
+      let result = '';
+      await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type ${apiLevel === 35 ? '' : '1'}' | wc -l | tr -d ' '"`, [], {
+        listeners: {
+          stdout: (data: Buffer) => {
+            result += data.toString();
           },
-        });
-        if (parseInt(result.trim(), 10) > parseInt(broadcasts, 10)) {
-          console.log('Emulator network ready.');
-          localeChanged = true;
-          await delay(retryInterval * 1000);
-          break;
-        }
-      } catch (error) {
-        console.warn(error instanceof Error ? error.message : error);
-      }
-  
-      if (attempts < maxAttempts) {
+        },
+      });
+      if (parseInt(result.trim(), 10) > parseInt(broadcasts, 10)) {
+        console.log('Emulator network ready.');
+        networkReady = true;
         await delay(retryInterval * 1000);
-      } else {
-        throw new Error(`Timeout waiting for emulator network to be ready.`);
+        break;
       }
-      attempts++;
+    } catch (error) {
+      console.warn(error instanceof Error ? error.message : error);
     }
+
+    if (attempts < maxAttempts) {
+      await delay(retryInterval * 1000);
+    } else {
+      throw new Error(`Timeout waiting for emulator network to be ready.`);
+    }
+    attempts++;
   }
 }
 

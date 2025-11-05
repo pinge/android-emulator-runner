@@ -98,6 +98,16 @@ export function checkApk(apk: string): void {
   }
 }
 
+export function checkLocale(locale: string): void {
+  // locale can be empty - the default value
+  if (typeof locale !== 'string') {
+    throw new Error(`Input for input.locale should be a string`);
+  }
+  if (locale.length > 0 && !locale.match(/^[a-z]{2}-[A-Z]{2}$/)) {
+    throw new Error(`Input for input.locale should be a valid locale, not ${locale}`);
+  }
+}
+
 export function checkEmulatorBuild(emulatorBuild: string): void {
   if (isNaN(Number(emulatorBuild)) || !Number.isInteger(Number(emulatorBuild))) {
     throw new Error(`Unexpected emulator build: '${emulatorBuild}'.`);

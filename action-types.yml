@@ -57,6 +57,8 @@ inputs:
    type: boolean
   apk:
     type: string
+  locale:
+    type: string
   emulator-build:
    type: string
   working-directory:

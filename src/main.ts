@@ -14,9 +14,11 @@ import {
   checkDisableImmersiveModeConfirmation,
   checkDisableStylusHandwriting,
   checkCleanupAvd,
+  checkLocale,
   checkDiskSize,
   checkPort,
   MIN_PORT,
+  checkApk,
 } from './input-validator';
 import { launchEmulator, killEmulator, deleteAvd } from './emulator-manager';
 import * as exec from '@actions/exec';
@@ -157,8 +159,13 @@ async function run() {
 
     // apk
     const apk = core.getInput('apk');
-    checkDiskSize(apk);
+    checkApk(apk);
     console.log(`APK: ${apk}`);
+
+    // apk
+    const locale = core.getInput('locale');
+    checkLocale(locale);
+    console.log(`locale: ${locale}`);
 
     // emulator build
     const emulatorBuildInput = core.getInput('emulator-build');
@@ -254,7 +261,8 @@ async function run() {
       enableHardwareKeyboard,
       disableImmersiveModeConfirmation,
       disableStylusHandwriting,
-      apk
+      apk,
+      locale
     );
 
     // execute the custom script
