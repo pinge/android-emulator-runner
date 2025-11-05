@@ -136,14 +136,14 @@ async function run() {
 
     // disable immersive mode confirmation
     const disableImmersiveModeConfirmationInput = core.getInput('disable-immersive-mode-confirmation');
-    checkDisableImmersiveModeConfirmation(disableImmersiveModeConfirmationInput)
-    const disableImmersiveModeConfirmation = enableHardwareKeyboardInput !== 'false'
+    checkDisableImmersiveModeConfirmation(disableImmersiveModeConfirmationInput);
+    const disableImmersiveModeConfirmation = disableImmersiveModeConfirmationInput !== 'false';
     console.log(`disable immersive mode confirmation: ${disableImmersiveModeConfirmation}`);
 
     // disable stylus handwriting
     const disableStylusHandwritingInput = core.getInput('disable-stylus-handwriting');
-    checkDisableStylusHandwriting(disableStylusHandwritingInput)
-    const disableStylusHandwriting = disableStylusHandwritingInput !== 'false'
+    checkDisableStylusHandwriting(disableStylusHandwritingInput);
+    const disableStylusHandwriting = disableStylusHandwritingInput !== 'false';
     console.log(`disable stylus handwriting: ${disableStylusHandwriting}`);
 
     // emulator build
