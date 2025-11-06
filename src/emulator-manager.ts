@@ -91,7 +91,8 @@ export async function launchEmulator(
     // const locale = localeMatch === null ? undefined : localeMatch[1]
     await waitForDevice(parseInt(apiLevel, 10), port, emulatorBootTimeout, locale);
     await adb(port, `shell input keyevent 82`);
-
+    console.log(`::endgroup::`);
+    console.log(`::group::Post Launch`);
     if (disableAnimations) {
       console.log('Disabling animations.');
       await adb(port, `shell settings put global window_animation_scale 0.0`);
@@ -99,24 +100,30 @@ export async function launchEmulator(
       await adb(port, `shell settings put global animator_duration_scale 0.0`);
     }
     if (disableSpellChecker) {
+      console.log('Disabling spell checker.');
       await adb(port, `shell settings put secure spell_checker_enabled 0`);
     }
     if (enableHardwareKeyboard) {
+      console.log('Enabling hardware keyboard.');
       await adb(port, `shell settings put secure show_ime_with_hard_keyboard 0`);
     }
     if (disableImmersiveModeConfirmation) {
+      console.log('Disabling immersive mode confirmation.');
       await adb(port, `shell settings put secure immersive_mode_confirmations confirmed`);
     }
     if (disableStylusHandwriting) {
+      console.log('Disabling stylus handwriting.');
       await adb(port, `shell settings put global stylus_handwriting_enabled 0`);
     }
     if (apk.length > 0) {
+      console.log(`::endgroup::`);
+      console.log(`::group::Install App`);
       await adb(port, 'wait-for-device');
       await adb(port, `install ${apk}`);
-      await adb(port, 'wait-for-device');
     }
   } finally {
     console.log(`::endgroup::`);
+    await adb(port, 'wait-for-device');
   }
 }
 
@@ -158,9 +165,8 @@ async function adb(port: number, command: string, retries = 3, interval = 2): Pr
       if (attempt === retries) {
         throw error;
       }
-      console.log(`adb error: ${String(error)}`);
       console.log(`adb retry: ${attempt + 1}/${retries}`);
-      await new Promise((resolve) => setTimeout(resolve, 1000 * Math.pow(interval, attempt)));
+      await new Promise((resolve) => setTimeout(resolve, 1000 * Math.pow(interval, attempt + 1)));
     }
   }
   throw new Error('adb: retry exited unexpectedly');
@@ -283,6 +289,7 @@ async function waitForDevice(apiLevel: number, port: number, emulatorBootTimeout
     }
     attempts++;
   }
+  await adb(port, 'wait-for-device');
 }
 
 function delay(ms: number) {
