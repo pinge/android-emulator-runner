@@ -96,7 +96,7 @@ export async function launchEmulator(
     // const localeMatch = emulatorOptions.match(/-change-locale ([a-z]{2}-[A-Z]{2})/)
     // const locale = localeMatch === null ? undefined : localeMatch[1]
     // await waitForDevice(parseInt(apiLevel, 10), port, emulatorBootTimeout, locale);
-    await adb(port, `wait-for-device shell 'input keyevent 82'`);
+    await adb(port, 'wait-for-device shell "input keyevent 82"');
     console.log(`::endgroup::`);
     console.log(`::group::Post Launch`);
     if (disableAnimations) {
