@@ -262,6 +262,7 @@ async function waitForNetworkReady(apiLevel: number, port: number, emulatorBootT
     }
     attempts++;
   }
+  await adb(port, 'wait-for-device');
 }
 
 /**
