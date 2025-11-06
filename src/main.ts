@@ -14,6 +14,7 @@ import {
   checkDisableImmersiveModeConfirmation,
   checkDisableStylusHandwriting,
   checkCleanupAvd,
+  checkWaitForNetwork,
   checkLocale,
   checkDiskSize,
   checkPort,
@@ -157,6 +158,12 @@ async function run() {
     cleanupAvd = cleanupAvdInput === 'true';
     console.log(`cleanup AVD: ${cleanupAvd}`);
 
+    // wait for network
+    const waitForNetworkInput = core.getInput('wait-for-network');
+    checkWaitForNetwork(waitForNetworkInput);
+    const waitForNetwork = waitForNetworkInput === 'true';
+    console.log(`wait for network: ${waitForNetwork}`);
+
     // apk
     const apk = core.getInput('apk');
     checkApk(apk);
@@ -262,7 +269,8 @@ async function run() {
       disableImmersiveModeConfirmation,
       disableStylusHandwriting,
       apk,
-      locale
+      locale,
+      waitForNetwork
     );
 
     // execute the custom script

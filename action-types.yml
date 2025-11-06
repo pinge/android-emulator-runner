@@ -55,10 +55,12 @@ inputs:
    type: boolean
   cleanup-avd:
    type: boolean
+  wait-for-network:
+   type: boolean
   apk:
-    type: string
+   type: string
   locale:
-    type: string
+   type: string
   emulator-build:
    type: string
   working-directory:

@@ -91,6 +91,12 @@ export function checkCleanupAvd(cleanupAvd: string): void {
   }
 }
 
+export function checkWaitForNetwork(waitForNetwork: string): void {
+  if (!isValidBoolean(waitForNetwork)) {
+    throw new Error(`Input for input.wait-for-network should be either 'true' or 'false'.`);
+  }
+}
+
 export function checkApk(apk: string): void {
   // apk can be empty - the default value
   if (typeof apk !== 'string') {

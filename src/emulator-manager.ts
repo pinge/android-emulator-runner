@@ -26,7 +26,8 @@ export async function launchEmulator(
   disableImmersiveModeConfirmation: boolean,
   disableStylusHandwriting: boolean,
   apk: string,
-  locale: string
+  locale: string,
+  waitForNetwork: boolean
 ): Promise<void> {
   try {
     console.log(`::group::Launch Emulator`);
@@ -90,7 +91,9 @@ export async function launchEmulator(
     if (locale.length > 0) {
       await waitForLocale(port, emulatorBootTimeout, locale);
     }
-    await waitForNetwork(parseInt(apiLevel, 10), port, emulatorBootTimeout);
+    if (waitForNetwork) {
+      await waitForNetworkReady(parseInt(apiLevel, 10), port, emulatorBootTimeout);
+    }
 
     // wait for emulator to complete booting
     // const localeMatch = emulatorOptions.match(/-change-locale ([a-z]{2}-[A-Z]{2})/)
@@ -182,7 +185,6 @@ async function adb(port: number, command: string, retries = 3, interval = 2): Pr
  * Wait for emulator to change locale.
  */
 async function waitForLocale(port: number, emulatorBootTimeout: number, locale: string): Promise<void> {
-  console.log(`waitForLocale()`);
   let localeChanged = locale === '';
   let attempts = 0;
   const retryInterval = 2; // retry every 2 seconds
@@ -218,8 +220,7 @@ async function waitForLocale(port: number, emulatorBootTimeout: number, locale: 
 /**
  * Wait for emulator network to initialize.
  */
-async function waitForNetwork(apiLevel: number, port: number, emulatorBootTimeout: number): Promise<void> {
-  console.log(`waitForDevice() apiLevel: '${apiLevel}'`);
+async function waitForNetworkReady(apiLevel: number, port: number, emulatorBootTimeout: number): Promise<void> {
   let attempts = 0;
   const retryInterval = 2; // retry every 2 seconds
   let maxAttempts = emulatorBootTimeout / 2;
@@ -261,7 +262,6 @@ async function waitForNetwork(apiLevel: number, port: number, emulatorBootTimeou
     }
     attempts++;
   }
-  await adb(port, 'wait-for-device');
 }
 
 /**

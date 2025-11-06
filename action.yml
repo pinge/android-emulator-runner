@@ -63,6 +63,9 @@ inputs:
   cleanup-avd:
     description: 'whether to delete the created AVD after execution - `true` or `false`'
     default: 'false'
+  wait-for-network:
+    description: 'whether to wait for the emulator network to be ready - `true` or `false`'
+    default: 'false'
   apk:
     description: 'the path for the apk to install when the emulator finishes booting'
   locale:
