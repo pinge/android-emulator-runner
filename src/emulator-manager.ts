@@ -86,11 +86,17 @@ export async function launchEmulator(
       },
     });
 
+    await adb(port, 'wait-for-device shell "while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;"');
+    if (locale.length > 0) {
+      await waitForLocale(port, emulatorBootTimeout, locale);
+    }
+    await waitForNetwork(parseInt(apiLevel, 10), port, emulatorBootTimeout);
+
     // wait for emulator to complete booting
     // const localeMatch = emulatorOptions.match(/-change-locale ([a-z]{2}-[A-Z]{2})/)
     // const locale = localeMatch === null ? undefined : localeMatch[1]
-    await waitForDevice(parseInt(apiLevel, 10), port, emulatorBootTimeout, locale);
-    await adb(port, `shell input keyevent 82`);
+    // await waitForDevice(parseInt(apiLevel, 10), port, emulatorBootTimeout, locale);
+    await adb(port, `wait-for-device shell 'input keyevent 82'`);
     console.log(`::endgroup::`);
     console.log(`::group::Post Launch`);
     if (disableAnimations) {
@@ -170,6 +176,92 @@ async function adb(port: number, command: string, retries = 3, interval = 2): Pr
     }
   }
   throw new Error('adb: retry exited unexpectedly');
+}
+
+/**
+ * Wait for emulator to change locale.
+ */
+async function waitForLocale(port: number, emulatorBootTimeout: number, locale: string): Promise<void> {
+  console.log(`waitForLocale()`);
+  let localeChanged = locale === '';
+  let attempts = 0;
+  const retryInterval = 2; // retry every 2 seconds
+  let maxAttempts = emulatorBootTimeout / 2;
+  if (locale.length > 0) {
+    while (!localeChanged) {
+      try {
+        let result = '';
+        await exec.exec(`adb -s emulator-${port} shell getprop persist.sys.locale`, [], {
+          listeners: {
+            stdout: (data: Buffer) => {
+              result += data.toString();
+            },
+          },
+        });
+        if (result.trim() === locale) {
+          console.log('Emulator locale changed.');
+          break;
+        }
+      } catch (error) {
+        console.warn(error instanceof Error ? error.message : error);
+      }
+      if (attempts < maxAttempts) {
+        await delay(retryInterval * 1000);
+      } else {
+        throw new Error(`Timeout waiting for emulator to change locale.`);
+      }
+      attempts++;
+    }
+  }
+}
+
+/**
+ * Wait for emulator network to initialize.
+ */
+async function waitForNetwork(apiLevel: number, port: number, emulatorBootTimeout: number): Promise<void> {
+  console.log(`waitForDevice() apiLevel: '${apiLevel}'`);
+  let attempts = 0;
+  const retryInterval = 2; // retry every 2 seconds
+  let maxAttempts = emulatorBootTimeout / 2;
+  attempts = 0;
+  maxAttempts = 10;
+  let broadcasts = '0';
+  let networkReady = false;
+  await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type 1' | wc -l | tr -d ' '"`, [], {
+    listeners: {
+      stdout: (data: Buffer) => {
+        broadcasts = data.toString();
+      },
+    },
+  });
+  while (!networkReady) {
+    try {
+      let result = '';
+      await exec.exec(`/bin/bash -c "adb -s emulator-${port} logcat -d | grep 'Sending CONNECTED broadcast for type ${apiLevel === 35 ? '' : '1'}' | wc -l | tr -d ' '"`, [], {
+        listeners: {
+          stdout: (data: Buffer) => {
+            result += data.toString();
+          },
+        },
+      });
+      if (parseInt(result.trim(), 10) > parseInt(broadcasts, 10)) {
+        console.log('Emulator network ready.');
+        networkReady = true;
+        // await delay(retryInterval * 1000);
+        break;
+      }
+    } catch (error) {
+      console.warn(error instanceof Error ? error.message : error);
+    }
+
+    if (attempts < maxAttempts) {
+      await delay(retryInterval * 1000);
+    } else {
+      throw new Error(`Timeout waiting for emulator network to be ready.`);
+    }
+    attempts++;
+  }
+  await adb(port, 'wait-for-device');
 }
 
 /**
