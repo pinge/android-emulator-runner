@@ -262,6 +262,7 @@ async function waitForNetworkReady(apiLevel: number, port: number, emulatorBootT
     }
     attempts++;
   }
+  // using adb wait-for-device after the network is ready seems to decrease flakiness
   await adb(port, 'wait-for-device');
 }
 
