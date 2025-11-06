@@ -21,6 +21,7 @@ inputs:
     default: 2
   ram-size:
     description: 'size of RAM to use for this AVD, in KB or MB, denoted with K or M. - e.g. `2048M`'
+    default: '4096M'
   heap-size:
     description: 'size of heap to use for this AVD in MB. - e.g. `512M`'
   sdcard-path-or-size:
