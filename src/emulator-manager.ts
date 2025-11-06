@@ -111,9 +111,9 @@ export async function launchEmulator(
       await adb(port, `shell settings put global stylus_handwriting_enabled 0`);
     }
     if (apk.length > 0) {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await adb(port, 'wait-for-device');
       await adb(port, `install ${apk}`);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await adb(port, 'wait-for-device');
     }
   } finally {
     console.log(`::endgroup::`);
@@ -135,7 +135,13 @@ export async function killEmulator(port: number): Promise<void> {
 }
 
 async function adb(port: number, command: string): Promise<number> {
-  return await exec.exec(`adb -s emulator-${port} ${command}`);
+  try {
+    return await exec.exec(`adb -s emulator-${port} ${command}`);
+  } catch (error: unknown) {
+    console.error(error);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    return await exec.exec(`adb -s emulator-${port} ${command}`);
+  }
 }
 
 /**
