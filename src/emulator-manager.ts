@@ -134,14 +134,36 @@ export async function killEmulator(port: number): Promise<void> {
   }
 }
 
-async function adb(port: number, command: string): Promise<number> {
-  try {
-    return await exec.exec(`adb -s emulator-${port} ${command}`);
-  } catch (error: unknown) {
-    console.error(error);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    return await exec.exec(`adb -s emulator-${port} ${command}`);
+/*
+
+  handle adb errors like the one below by retrying with an exponential fallback
+
+  adb: failed to install /Users/a-runner/actions-runner/_work/athlete/athlete/android/app/6.96.0-development-20251106015116-universal.apk: cmd: Failure calling service package: Broken pipe (32)
+  Error: The process '/Users/a-runner/.android/sdk/platform-tools/adb' failed with exit code 1
+      at ExecState._setResult (/Users/a-runner/actions-runner/_work/_actions/pinge/android-emulator-runner/eda3ac4c8af1ca313a52e3e3016f5ee923e4238e/node_modules/@actions/exec/lib/toolrunner.js:592:25)
+      at ExecState.CheckComplete (/Users/a-runner/actions-runner/_work/_actions/pinge/android-emulator-runner/eda3ac4c8af1ca313a52e3e3016f5ee923e4238e/node_modules/@actions/exec/lib/toolrunner.js:575:18)
+      at ChildProcess.<anonymous> (/Users/a-runner/actions-runner/_work/_actions/pinge/android-emulator-runner/eda3ac4c8af1ca313a52e3e3016f5ee923e4238e/node_modules/@actions/exec/lib/toolrunner.js:469:27)
+      at ChildProcess.emit (node:events:524:28)
+      at maybeClose (node:internal/child_process:1104:16)
+      at Socket.<anonymous> (node:internal/child_process:456:11)
+      at Socket.emit (node:events:524:28)
+      at Pipe.<anonymous> (node:net:343:12)
+
+*/
+async function adb(port: number, command: string, retries = 3, interval = 2): Promise<number> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await exec.exec(`adb -s emulator-${port} ${command}`);
+    } catch (error: unknown) {
+      if (attempt === retries) {
+        throw error;
+      }
+      console.log(`adb error: ${String(error)}`);
+      console.log(`adb retry: ${attempt + 1}/${retries}`);
+      await new Promise((resolve) => setTimeout(resolve, Math.pow(interval, attempt)));
+    }
   }
+  throw new Error('adb: retry exited unexpectedly');
 }
 
 /**
