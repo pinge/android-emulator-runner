@@ -160,7 +160,7 @@ async function adb(port: number, command: string, retries = 3, interval = 2): Pr
       }
       console.log(`adb error: ${String(error)}`);
       console.log(`adb retry: ${attempt + 1}/${retries}`);
-      await new Promise((resolve) => setTimeout(resolve, Math.pow(interval, attempt)));
+      await new Promise((resolve) => setTimeout(resolve, 1000 * Math.pow(interval, attempt)));
     }
   }
   throw new Error('adb: retry exited unexpectedly');
