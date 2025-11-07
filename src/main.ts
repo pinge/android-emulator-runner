@@ -76,7 +76,7 @@ async function run() {
 
     // RAM to use for AVD
     const ramSize = core.getInput('ram-size');
-    console.log(`RAM size: ${ramSize}`);
+    console.log(`RAM size: ${ramSize}MB`);
 
     // Heap size to use for AVD
     const heapSize = core.getInput('heap-size');

@@ -47,7 +47,8 @@ export async function launchEmulator(
     }
 
     if (ramSize) {
-      await exec.exec(`sh -c \\"printf 'hw.ramSize=${ramSize}\n' >> ${process.env.ANDROID_AVD_HOME}/"${avdName}".avd"/config.ini`);
+      console.log(`Setting memory size to ${ramSize}MB.`);
+      emulatorOptions += ` -memory ${ramSize}`;
     }
 
     if (heapSize) {
@@ -74,8 +75,11 @@ export async function launchEmulator(
       }
     }
 
+    emulatorOptions += ` -no-direct-adb -adb-path /Users/a-runner/.android/sdk/platform-tools/adb`;
+
     // start emulator
-    console.log('Starting emulator.');
+    console.log('Starting emulator with the following options:');
+    console.log(emulatorOptions);
 
     await exec.exec(`sh -c \\"${process.env.ANDROID_HOME}/emulator/emulator -port ${port} -avd "${avdName}" ${emulatorOptions} &"`, [], {
       listeners: {

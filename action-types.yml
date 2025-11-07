@@ -24,7 +24,7 @@ inputs:
   cores:
    type: integer
   ram-size:
-   type: string
+   type: integer
   heap-size:
    type: string
   sdcard-path-or-size:
