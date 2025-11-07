@@ -153,7 +153,8 @@ async function untilNetworkIsReady(port: number): Promise<void> {
 export async function killEmulator(port: number): Promise<void> {
   try {
     console.log(`::group::Terminate Emulator`);
-    await adb(port, `emu kill`);
+    await adb(port, 'wait-for-device emu kill');
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   } catch (error) {
     console.log(error instanceof Error ? error.message : error);
   } finally {
