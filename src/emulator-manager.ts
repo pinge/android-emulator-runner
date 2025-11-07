@@ -93,10 +93,12 @@ export async function launchEmulator(
 
     await adb(port, 'wait-for-device shell "while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;"');
     if (locale.length > 0) {
-      await waitForLocale(port, emulatorBootTimeout, locale);
+      await adb(port, `wait-for-device shell "while [[ $(getprop persist.sys.locale) != \'${locale}\' ]]; do sleep 1; done;"`);
+      // await waitForLocale(port, emulatorBootTimeout, locale);
     }
     if (waitForNetwork) {
-      await waitForNetworkReady(parseInt(apiLevel, 10), port, emulatorBootTimeout);
+      await untilNetworkIsReady(port);
+      // await waitForNetworkReady(parseInt(apiLevel, 10), port, emulatorBootTimeout);
     }
 
     // wait for emulator to complete booting
@@ -138,6 +140,11 @@ export async function launchEmulator(
     console.log(`::endgroup::`);
     await adb(port, 'wait-for-device');
   }
+}
+
+async function untilNetworkIsReady(port: number): Promise<void> {
+  await adb(port, `wait-for-device shell "while [[ -z $(ifconfig | grep -A 1 -E \'^(eth0|wlan0)\' | grep \'inet addr\' | sed -E \'s/.*inet addr:([0-9.]+).*/\\1/\') ]]; do sleep 1; done;"`);
+  await adb(port, 'wait-for-device shell "ping -i 1 -c 3 -w 3 8.8.8.8"');
 }
 
 /**
