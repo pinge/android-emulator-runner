@@ -71,6 +71,8 @@ inputs:
     description: 'the path for the apk to install when the emulator finishes booting'
   locale:
     description: 'the locale the emulator should boot with'
+  adb-path:
+    description: 'whether to use external adb executable for internal communication'
   emulator-build:
     description: 'build number of a specific version of the emulator binary to use - e.g. `6061023` for emulator v29.3.0.0'
   working-directory:

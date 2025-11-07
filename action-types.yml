@@ -61,6 +61,8 @@ inputs:
    type: string
   locale:
    type: string
+  adb-path:
+   type: string
   emulator-build:
    type: string
   working-directory:

@@ -16,6 +16,7 @@ import {
   checkCleanupAvd,
   checkWaitForNetwork,
   checkLocale,
+  checkAdbPath,
   checkDiskSize,
   checkPort,
   MIN_PORT,
@@ -169,10 +170,15 @@ async function run() {
     checkApk(apk);
     console.log(`APK: ${apk}`);
 
-    // apk
+    // locale
     const locale = core.getInput('locale');
     checkLocale(locale);
     console.log(`locale: ${locale}`);
+
+    // adb path
+    const adbPath = core.getInput('adb-path');
+    checkAdbPath(adbPath);
+    console.log(`adb path: ${adbPath}`);
 
     // emulator build
     const emulatorBuildInput = core.getInput('emulator-build');
@@ -270,6 +276,7 @@ async function run() {
       disableStylusHandwriting,
       apk,
       locale,
+      adbPath,
       waitForNetwork
     );
 

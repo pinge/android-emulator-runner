@@ -114,6 +114,13 @@ export function checkLocale(locale: string): void {
   }
 }
 
+export function checkAdbPath(adbPath: string): void {
+  // adb path can be empty - the default value
+  if (typeof adbPath !== 'string') {
+    throw new Error(`Input for input.adb-path should be a string`);
+  }
+}
+
 export function checkEmulatorBuild(emulatorBuild: string): void {
   if (isNaN(Number(emulatorBuild)) || !Number.isInteger(Number(emulatorBuild))) {
     throw new Error(`Unexpected emulator build: '${emulatorBuild}'.`);

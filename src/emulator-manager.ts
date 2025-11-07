@@ -27,6 +27,7 @@ export async function launchEmulator(
   disableStylusHandwriting: boolean,
   apk: string,
   locale: string,
+  adbPath: string,
   waitForNetwork: boolean
 ): Promise<void> {
   try {
@@ -75,7 +76,9 @@ export async function launchEmulator(
       }
     }
 
-    emulatorOptions += ` -no-direct-adb -adb-path /Users/a-runner/.android/sdk/platform-tools/adb`;
+    if (adbPath.length > 0) {
+      emulatorOptions += ` -no-direct-adb -adb-path ${adbPath}`;
+    }
 
     // start emulator
     console.log('Starting emulator with the following options:');
