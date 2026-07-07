@@ -153,7 +153,7 @@ async function untilNetworkIsReady(port: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 2000));
   // TODO add timeout, adb wait-for-device will wait forever if emulator is killed
   await adb(port, `wait-for-device shell "while [[ -z $(ifconfig | grep -A 1 -E \'^(eth0|wlan0)\' | grep \'inet addr\' | sed -E \'s/.*inet addr:([0-9.]+).*/\\1/\') ]]; do sleep 1; done;"`);
-  await adb(port, 'wait-for-device shell "ping -i 1 -c 3 -w 3 8.8.8.8"');
+  await adb(port, 'wait-for-device shell "ping -i 1 -c 3 -w 3 8.8.8.8"', 5, 3);
 }
 
 /**
